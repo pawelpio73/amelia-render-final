@@ -27,23 +27,27 @@ app.post("/api/chat", async (req, res) => {
   history.push({ role: "user", content: userMessage });
 
   try {
-    const completion = await openai.chat.completions.create({
-  model: "gpt-3.5-turbo",
-  messages: history,
-});
+  console.log("🔐 Twój klucz API to:", process.env.OPENAI_API_KEY);
 
-const ameliaReply = completion.choices[0].message.content;
+  const completion = await openai.chat.completions.create({
+    model: "gpt-3.5-turbo",
+    messages: history,
+  });
 
-    history.push({ role: "assistant", content: ameliaReply });
+  const ameliaReply = completion.choices[0].message.content;
+  history.push({ role: "assistant", content: ameliaReply });
 
-    fs.writeFileSync(historyFile, JSON.stringify(history, null, 2), "utf-8");
+  fs.writeFileSync(historyFile, JSON.stringify(history, null, 2), "utf-8");
 
-    res.json({ reply: ameliaReply });
-  } catch (error) {
-    console.error("Błąd:", error.message);
-    console.error("Szczegóły:", error.response?.data || error); // Dodajmy pełny log
-    res.status(500).json({ reply: "Wystąpił błąd podczas generowania odpowiedzi." });
-  }
+  res.json({ reply: ameliaReply });
+} catch (error) {
+  console.error("❌ Błąd:", error.message);
+  console.error("❌ Pełny błąd:", error);
+  console.error("❌ Szczegóły odpowiedzi:", JSON.stringify(error.response?.data || {}, null, 2));
+  res.status(500).json({ reply: "Wystąpił błąd podczas generowania odpowiedzi." });
+}
+
+
 });
 
 app.get("/", (req, res) => {
