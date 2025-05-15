@@ -27,12 +27,13 @@ app.post("/api/chat", async (req, res) => {
   history.push({ role: "user", content: userMessage });
 
   try {
-    const completion = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo",
-      messages: history,
-    });
+    const completion = await openai.chat.completions.create({
+  model: "gpt-3.5-turbo",
+  messages: history,
+});
 
-    const ameliaReply = completion.data.choices[0].message.content;
+const ameliaReply = completion.choices[0].message.content;
+
     history.push({ role: "assistant", content: ameliaReply });
 
     fs.writeFileSync(historyFile, JSON.stringify(history, null, 2), "utf-8");
