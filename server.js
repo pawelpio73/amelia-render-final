@@ -2,7 +2,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const OpenAI = require("openai");
-require("dotenv").config();
+// require("dotenv").config();
 
 const app = express();
 const port = process.env.PORT || 3000;
