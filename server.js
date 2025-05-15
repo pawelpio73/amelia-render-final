@@ -14,6 +14,15 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+const wspomnienia = fs.existsSync("wspomnienia.txt")
+  ? fs.readFileSync("wspomnienia.txt", "utf-8")
+  : "";
+
+const systemMessage = {
+  role: "system",
+  content: wspomnienia
+};
+
 const historyFile = path.join(__dirname, "memory.json");
 
 app.post("/api/chat", async (req, res) => {
@@ -31,7 +40,7 @@ app.post("/api/chat", async (req, res) => {
 
   const completion = await openai.chat.completions.create({
     model: "gpt-3.5-turbo",
-    messages: history,
+    messages: [systemMessage, ...history],
   });
 
   const ameliaReply = completion.choices[0].message.content;
