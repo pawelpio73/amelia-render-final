@@ -40,6 +40,7 @@ app.post("/api/chat", async (req, res) => {
     res.json({ reply: ameliaReply });
   } catch (error) {
     console.error("Błąd:", error.message);
+    console.error("Szczegóły:", error.response?.data || error); // Dodajmy pełny log
     res.status(500).json({ reply: "Wystąpił błąd podczas generowania odpowiedzi." });
   }
 });
