@@ -14,14 +14,15 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const wspomnienia = fs.existsSync("wspomnienia.txt")
-  ? fs.readFileSync("wspomnienia.txt", "utf-8")
+const wspomnienia = fs.existsSync("wspomnienia_fantazje.txt")
+  ? fs.readFileSync("wspomnienia_fantazje.txt", "utf-8")
   : "";
 
 const systemMessage = {
   role: "system",
   content: wspomnienia
 };
+
 
 const historyFile = path.join(__dirname, "memory.json");
 
