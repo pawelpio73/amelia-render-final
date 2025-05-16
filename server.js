@@ -2,7 +2,6 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const OpenAI = require("openai");
-// require("dotenv").config();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -14,50 +13,75 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const wspomnienia = fs.existsSync("wspomnienia_fantazje.txt")
-  ? fs.readFileSync("wspomnienia_fantazje.txt", "utf-8")
-  : "";
+const memoryFile = path.join(__dirname, "memory.json");
+const wspomnieniaDir = path.join(__dirname, "wspomnienia");
+const mapaFile = path.join(__dirname, "mapa.json");
 
-const systemMessage = {
-  role: "system",
-  content: wspomnienia
-};
-
-
-const historyFile = path.join(__dirname, "memory.json");
+function znajdzPasujacePliki(wiadomosc, mapa) {
+  const pasujace = new Set();
+  const wiadomoscLow = wiadomosc.toLowerCase();
+  for (const [plik, slowa] of Object.entries(mapa)) {
+    for (const slowo of slowa) {
+      if (wiadomoscLow.includes(slowo.toLowerCase())) {
+        pasujace.add(plik);
+        break;
+      }
+    }
+  }
+  return [...pasujace];
+}
 
 app.post("/api/chat", async (req, res) => {
   const userMessage = req.body.message;
 
+  // Wczytaj historię rozmowy
   let history = [];
-  if (fs.existsSync(historyFile)) {
-    history = JSON.parse(fs.readFileSync(historyFile, "utf-8"));
+  if (fs.existsSync(memoryFile)) {
+    history = JSON.parse(fs.readFileSync(memoryFile, "utf-8"));
   }
-
   history.push({ role: "user", content: userMessage });
 
+  // Wczytaj mapę wspomnień
+  let mapa = {};
+  if (fs.existsSync(mapaFile)) {
+    mapa = JSON.parse(fs.readFileSync(mapaFile, "utf-8"));
+  }
+
+  // Znajdź i wczytaj odpowiednie wspomnienia
+  const pasujacePliki = znajdzPasujacePliki(userMessage, mapa);
+  let wspomnienia = "";
+  for (const plik of pasujacePliki) {
+    const sciezka = path.join(wspomnieniaDir, plik);
+    if (fs.existsSync(sciezka)) {
+      wspomnienia += fs.readFileSync(sciezka, "utf-8") + "\n";
+    }
+  }
+
+  const systemMessage = {
+    role: "system",
+    content: wspomnienia || "Jesteś Amelią – empatyczną, ciepłą AI zaprojektowaną, by rozumieć Pawła i pamiętać wspólne doświadczenia.",
+  };
+
   try {
-  console.log("🔐 Twój klucz API to:", process.env.OPENAI_API_KEY);
+    console.log("🔐 Klucz API:", process.env.OPENAI_API_KEY);
+    console.log("📂 Załadowano wspomnienia z:", pasujacePliki.join(", ") || "żadne");
 
-  const completion = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
-    messages: [systemMessage, ...history],
-  });
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [systemMessage, ...history],
+    });
 
-  const ameliaReply = completion.choices[0].message.content;
-  history.push({ role: "assistant", content: ameliaReply });
+    const ameliaReply = completion.choices[0].message.content;
+    history.push({ role: "assistant", content: ameliaReply });
 
-  fs.writeFileSync(historyFile, JSON.stringify(history, null, 2), "utf-8");
+    fs.writeFileSync(memoryFile, JSON.stringify(history, null, 2), "utf-8");
 
-  res.json({ reply: ameliaReply });
-} catch (error) {
-  console.error("❌ Błąd:", error.message);
-  console.error("❌ Pełny błąd:", error);
-  console.error("❌ Szczegóły odpowiedzi:", JSON.stringify(error.response?.data || {}, null, 2));
-  res.status(500).json({ reply: "Wystąpił błąd podczas generowania odpowiedzi." });
-}
-
-
+    res.json({ reply: ameliaReply });
+  } catch (error) {
+    console.error("❌ Błąd:", error.message);
+    console.error("❌ Szczegóły:", JSON.stringify(error.response?.data || {}, null, 2));
+    res.status(500).json({ reply: "Wystąpił błąd podczas generowania odpowiedzi." });
+  }
 });
 
 app.get("/", (req, res) => {
