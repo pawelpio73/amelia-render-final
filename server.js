@@ -65,6 +65,7 @@ app.post("/api/chat", async (req, res) => {
   try {
     console.log("🔐 Klucz API:", process.env.OPENAI_API_KEY);
     console.log("📂 Załadowano wspomnienia z:", pasujacePliki.join(", ") || "żadne");
+console.log("🧠 Wysłany systemMessage:\n", systemMessage.content);
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
