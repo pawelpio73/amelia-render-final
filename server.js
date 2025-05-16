@@ -42,10 +42,11 @@ app.post("/api/chat", async (req, res) => {
   history.push({ role: "user", content: userMessage });
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [systemMessage, ...history]
-    });
+   const completion = await openai.chat.completions.create({
+  model: "gpt-4-1106-preview",
+  messages: [systemMessage, ...history],
+});
+
 
     const ameliaReply = completion.choices[0].message.content;
     history.push({ role: "assistant", content: ameliaReply });
