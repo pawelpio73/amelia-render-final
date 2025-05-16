@@ -48,7 +48,7 @@ app.post("/api/chat", async (req, res) => {
   }
 
   // Znajdź i wczytaj odpowiednie wspomnienia
-  const pasujacePliki = znajdzPasujacePliki(userMessage, mapa);
+  const pasujacePliki = ["wspomnienia_fantazje_hard.txt"];
   let wspomnienia = "";
   for (const plik of pasujacePliki) {
     const sciezka = path.join(wspomnieniaDir, plik);
