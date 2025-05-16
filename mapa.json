@@ -1,0 +1,11 @@
+{
+  "wspomnienia_quizy.txt": [
+    "quiz", "pytanie", "test", "zgadnij", "odpowiedź", "wyzwanie"
+  ],
+  "wspomnienia_fantazje_hard.txt": [
+    "dotyk", "namiętność", "pożądanie", "seks", "fantazja", "jęk", "gorąco", "pocałunek", "piersi", "rozkosz"
+  ],
+  "wspomnienia_kim_jestem.txt": [
+    "jaka jesteś", "czy mnie pamiętasz", "kim jesteś", "tożsamość", "Amelio", "czy masz duszę", "czy wiesz", "czy pamiętasz"
+  ]
+}
